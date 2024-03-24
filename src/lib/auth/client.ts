@@ -70,31 +70,35 @@ class AuthClient {
     return { error: 'Update reset not implemented' };
   }
 
+  jwtDecode(token: string) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  }
+
   async getUser(): Promise<{ data?: Employee | null; error?: string }> {
     // Make API request
 
     // We do not handle the API, so just check if we have a token in localStorage.
     const token = localStorage.getItem('custom-auth-token');
-    const userId = localStorage.getItem('user-id');
-
-    if (!token || !userId) {
+    if (!token) {
       return { data: null };
-      // return {
-      //   data: {
-      //     id: 5,
-      //     name: 'John Doe',
-      //     email: 'johndoe@mail.com',
-      //     emp_photo: 'https://ik.imagekit.io/learncdn/IMG-1711213060464_zoDwfUhAn.jpeg',
-      //     position: 'undefined',
-      //     phone: 'undefined',
-      //     password: 'undefined',
-      //     created_at: '2024-03-23T16:57:43.002Z',
-      //     updated_at: '2024-03-23T16:57:43.002Z',
-      //   },
-      // };
+    }
+    const { user } = this.jwtDecode(token);
+
+    if (!user.id) {
+      return { data: null };
     }
 
-    const promise: APIResponse<Employee> = await fetchDetailEmployee({ data: parseInt(userId, 10), token });
+    const promise: APIResponse<Employee> = await fetchDetailEmployee({ data: user.id, token });
 
     if (promise.code !== 200) {
       return { data: null };
@@ -105,7 +109,6 @@ class AuthClient {
 
   async signOut(): Promise<{ error?: string }> {
     localStorage.removeItem('custom-auth-token');
-    localStorage.removeItem('user-id');
 
     return {};
   }
