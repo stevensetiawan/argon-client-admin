@@ -1,9 +1,9 @@
 {
-  "name": "mocaas-admin",
+  "name": "argon-admin",
   "version": "1.0.0",
-  "author": "Mocaas",
+  "author": "Argon",
   "licence": "MIT",
-  "homepage": "https://mocaas.tv",
+  "homepage": "",
   "private": false,
   "scripts": {
     "dev": "next dev",
