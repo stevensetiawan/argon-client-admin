@@ -59,7 +59,7 @@ export function AttendancesTable(): React.JSX.Element {
                 return (
                   <TableRow hover key={row.id}>
                     <TableCell>
-                      <RouterLink href="/dashboard/employees/1">
+                      <RouterLink href={`/dashboard/employees/${row.employee_id}`}>
                         <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                           <Avatar src={row.emp_photo} />
                           <Typography variant="subtitle2">{row.name}</Typography>

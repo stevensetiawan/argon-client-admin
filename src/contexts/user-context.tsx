@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 
-import type { User } from '@/types/user';
+import type { Employee } from '@/types/employee';
 import { authClient } from '@/lib/auth/client';
 import { logger } from '@/lib/default-logger';
 
 export interface UserContextValue {
-  user: User | null;
+  user: Employee | null;
   error: string | null;
   isLoading: boolean;
   checkSession?: () => Promise<void>;
@@ -20,7 +20,7 @@ export interface UserProviderProps {
 }
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
-  const [state, setState] = React.useState<{ user: User | null; error: string | null; isLoading: boolean }>({
+  const [state, setState] = React.useState<{ user: Employee | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
     isLoading: true,
@@ -44,7 +44,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
   }, []);
 
   React.useEffect(() => {
-    checkSession().catch((err) => {
+    checkSession().catch((err: unknown) => {
       logger.error(err);
       // noop
     });

@@ -1,20 +1,15 @@
 'use client';
 
-import type { User } from '@/types/user';
+import { fetchDetailEmployee } from '@/networks/employee';
+
+import type { Employee } from '@/types/employee';
+import type { APIResponse } from '@/types/response';
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
   window.crypto.getRandomValues(arr);
   return Array.from(arr, (v) => v.toString(16).padStart(2, '0')).join('');
 }
-
-const user = {
-  id: 'USR-000',
-  avatar: '/assets/avatar.png',
-  firstName: 'Sofia',
-  lastName: 'Rivers',
-  email: 'sofia@devias.io',
-} satisfies User;
 
 export interface SignUpParams {
   firstName: string;
@@ -75,21 +70,42 @@ class AuthClient {
     return { error: 'Update reset not implemented' };
   }
 
-  async getUser(): Promise<{ data?: User | null; error?: string }> {
+  async getUser(): Promise<{ data?: Employee | null; error?: string }> {
     // Make API request
 
     // We do not handle the API, so just check if we have a token in localStorage.
     const token = localStorage.getItem('custom-auth-token');
+    const userId = localStorage.getItem('user-id');
 
-    if (!token) {
+    if (!token || !userId) {
+      return { data: null };
+      // return {
+      //   data: {
+      //     id: 5,
+      //     name: 'John Doe',
+      //     email: 'johndoe@mail.com',
+      //     emp_photo: 'https://ik.imagekit.io/learncdn/IMG-1711213060464_zoDwfUhAn.jpeg',
+      //     position: 'undefined',
+      //     phone: 'undefined',
+      //     password: 'undefined',
+      //     created_at: '2024-03-23T16:57:43.002Z',
+      //     updated_at: '2024-03-23T16:57:43.002Z',
+      //   },
+      // };
+    }
+
+    const promise: APIResponse<Employee> = await fetchDetailEmployee({ data: parseInt(userId, 10), token });
+
+    if (promise.code !== 200) {
       return { data: null };
     }
 
-    return { data: user };
+    return { data: promise.data };
   }
 
   async signOut(): Promise<{ error?: string }> {
     localStorage.removeItem('custom-auth-token');
+    localStorage.removeItem('user-id');
 
     return {};
   }

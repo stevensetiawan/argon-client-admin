@@ -3,7 +3,7 @@
 import * as React from 'react';
 import RouterLink from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getAttendances, selectAttendance } from '@/redux/reducers/attendance';
+import { getEmployees, selectEmployee } from '@/redux/reducers/employee';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -17,7 +17,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import type { Attendance } from '@/types/attendance';
+import type { Employee } from '@/types/employee';
 
 function noop(): void {
   // do nothing
@@ -25,14 +25,14 @@ function noop(): void {
 
 export function EmployeesTable(): React.JSX.Element {
   const dispatch = useAppDispatch();
-  const employeeState = useAppSelector(selectAttendance);
+  const employeeState = useAppSelector(selectEmployee);
   const [page, setPage] = React.useState(0);
   const rowsPerPage = 5;
 
-  const paginatedEmployees = applyPagination(employeeState.attendances ?? [], page, rowsPerPage);
+  const paginatedEmployees = applyPagination(employeeState.employees ?? [], page, rowsPerPage);
 
   React.useEffect(() => {
-    const promise = dispatch(getAttendances());
+    const promise = dispatch(getEmployees());
 
     return () => {
       promise.abort();
@@ -57,7 +57,7 @@ export function EmployeesTable(): React.JSX.Element {
                 return (
                   <TableRow hover key={row.id}>
                     <TableCell>
-                      <RouterLink href="/dashboard/employees/1">
+                      <RouterLink href={`/dashboard/employees/${row.id}`}>
                         <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                           <Avatar src={row.emp_photo} />
                           <Typography variant="subtitle2">{row.name}</Typography>
@@ -96,6 +96,6 @@ export function EmployeesTable(): React.JSX.Element {
   );
 }
 
-function applyPagination(rows: Attendance[], page: number, rowsPerPage: number): Attendance[] {
+function applyPagination(rows: Employee[], page: number, rowsPerPage: number): Employee[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }

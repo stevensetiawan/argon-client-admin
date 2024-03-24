@@ -25,9 +25,10 @@ import { useUser } from '@/hooks/use-user';
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email(),
   password: zod.string().min(1, { message: 'Password is required' }),
+  position: zod.string(),
 });
 
-const defaultValues = { email: '', password: '' } satisfies SignInParams;
+const defaultValues = { email: '', password: '', position: 'hrd' } satisfies SignInParams;
 
 export function SignInForm(): React.JSX.Element {
   const router = useRouter();
