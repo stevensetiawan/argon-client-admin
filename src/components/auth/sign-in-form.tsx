@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FetchState } from '@/enums/Fetch';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { selectUser, signIn } from '@/redux/reducers/user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
-import Link from '@mui/material/Link';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -18,8 +19,7 @@ import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlas
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 
-import { paths } from '@/paths';
-import { authClient } from '@/lib/auth/client';
+import type { SignInParams } from '@/types/user';
 import { useUser } from '@/hooks/use-user';
 
 const schema = zod.object({
@@ -27,35 +27,34 @@ const schema = zod.object({
   password: zod.string().min(1, { message: 'Password is required' }),
 });
 
-type Values = zod.infer<typeof schema>;
-
-const defaultValues = { email: 'sofia@devias.io', password: 'Secret1' } satisfies Values;
+const defaultValues = { email: '', password: '' } satisfies SignInParams;
 
 export function SignInForm(): React.JSX.Element {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const userState = useAppSelector(selectUser);
 
   const { checkSession } = useUser();
 
   const [showPassword, setShowPassword] = React.useState<boolean>();
-
-  const [isPending, setIsPending] = React.useState<boolean>(false);
 
   const {
     control,
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+  } = useForm<SignInParams>({ defaultValues, resolver: zodResolver(schema) });
 
   const onSubmit = React.useCallback(
-    async (values: Values): Promise<void> => {
-      setIsPending(true);
-
-      const { error } = await authClient.signInWithPassword(values);
-
-      if (error) {
-        setError('root', { type: 'server', message: error });
-        setIsPending(false);
+    async (values: SignInParams): Promise<void> => {
+      try {
+        const promise = await dispatch(signIn(values)).unwrap();
+        if (promise.code !== 200) {
+          setError('root', { type: 'server', message: promise.message });
+        }
+        localStorage.setItem('custom-auth-token', promise.data.token);
+      } catch (error) {
+        setError('root', { type: 'server', message: 'Something went wrong' });
         return;
       }
 
@@ -66,19 +65,13 @@ export function SignInForm(): React.JSX.Element {
       // After refresh, GuestGuard will handle the redirect
       router.refresh();
     },
-    [checkSession, router, setError]
+    [checkSession, dispatch, router, setError]
   );
 
   return (
     <Stack spacing={4}>
       <Stack spacing={1}>
         <Typography variant="h4">Sign in</Typography>
-        <Typography color="text.secondary" variant="body2">
-          Don&apos;t have an account?{' '}
-          <Link component={RouterLink} href={paths.auth.signUp} underline="hover" variant="subtitle2">
-            Sign up
-          </Link>
-        </Typography>
       </Stack>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
@@ -127,14 +120,9 @@ export function SignInForm(): React.JSX.Element {
               </FormControl>
             )}
           />
-          <div>
-            <Link component={RouterLink} href={paths.auth.resetPassword} variant="subtitle2">
-              Forgot password?
-            </Link>
-          </div>
           {errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
-          <Button disabled={isPending} type="submit" variant="contained">
-            Sign in
+          <Button disabled={userState.status === FetchState.LOADING} type="submit" variant="contained">
+            {userState.status === FetchState.LOADING ? 'Loading...' : 'Sign in'}
           </Button>
         </Stack>
       </form>

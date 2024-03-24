@@ -12,5 +12,5 @@ export const navItems = [
       type: 'startsWith',
     },
   },
-  { key: 'attendances', title: 'Attendances', href: paths.dashboard.attendances, icon: 'list' },
+  { key: 'attendances', title: 'Attendances', href: paths.dashboard.attendances, icon: 'timer' },
 ] satisfies NavItemConfig[];

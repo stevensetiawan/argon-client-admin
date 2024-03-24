@@ -1,8 +1,10 @@
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 import { ChartPie as ChartPieIcon } from '@phosphor-icons/react/dist/ssr/ChartPie';
+import { File as FileIcon } from '@phosphor-icons/react/dist/ssr/File';
 import { GearSix as GearSixIcon } from '@phosphor-icons/react/dist/ssr/GearSix';
 import { List as ListIcon } from '@phosphor-icons/react/dist/ssr/List';
 import { PlugsConnected as PlugsConnectedIcon } from '@phosphor-icons/react/dist/ssr/PlugsConnected';
+import { Timer as TimerIcon } from '@phosphor-icons/react/dist/ssr/Timer';
 import { User as UserIcon } from '@phosphor-icons/react/dist/ssr/User';
 import { Users as UsersIcon } from '@phosphor-icons/react/dist/ssr/Users';
 import { XSquare } from '@phosphor-icons/react/dist/ssr/XSquare';
@@ -15,4 +17,6 @@ export const navIcons = {
   user: UserIcon,
   users: UsersIcon,
   list: ListIcon,
+  file: FileIcon,
+  timer: TimerIcon,
 } as Record<string, Icon>;

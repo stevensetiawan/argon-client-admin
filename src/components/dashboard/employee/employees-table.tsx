@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import RouterLink from 'next/link';
-import { Button } from '@mui/material';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getAttendances, selectAttendance } from '@/redux/reducers/attendance';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -17,43 +17,27 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { useSelection } from '@/hooks/use-selection';
+import type { Attendance } from '@/types/attendance';
 
 function noop(): void {
   // do nothing
 }
 
-export interface Employee {
-  id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
-  createdAt: Date;
-}
+export function EmployeesTable(): React.JSX.Element {
+  const dispatch = useAppDispatch();
+  const employeeState = useAppSelector(selectAttendance);
+  const [page, setPage] = React.useState(0);
+  const rowsPerPage = 5;
 
-interface EmployeesTableProps {
-  count?: number;
-  page?: number;
-  rows?: Employee[];
-  rowsPerPage?: number;
-}
+  const paginatedEmployees = applyPagination(employeeState.attendances ?? [], page, rowsPerPage);
 
-export function EmployeesTable({
-  count = 0,
-  rows = [],
-  page = 0,
-  rowsPerPage = 0,
-}: EmployeesTableProps): React.JSX.Element {
-  const rowIds = React.useMemo(() => {
-    return rows.map((employee) => employee.id);
-  }, [rows]);
+  React.useEffect(() => {
+    const promise = dispatch(getAttendances());
 
-  const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
-  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
-  const selectedAll = rows.length > 0 && selected?.size === rows.length;
+    return () => {
+      promise.abort();
+    };
+  }, [dispatch]);
 
   return (
     <Card>
@@ -61,71 +45,48 @@ export function EmployeesTable({
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAll}
-                  indeterminate={selectedSome}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      selectAll();
-                    } else {
-                      deselectAll();
-                    }
-                  }}
-                />
-              </TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Position</TableCell>
               <TableCell>Phone</TableCell>
-              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
-              const isSelected = selected?.has(row.id);
-
-              return (
-                <TableRow hover key={row.id} selected={isSelected}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectOne(row.id);
-                        } else {
-                          deselectOne(row.id);
-                        }
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <RouterLink href="/dashboard/employees/1">
-                      <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                        <Avatar src={row.avatar} />
-                        <Typography variant="subtitle2">{row.name}</Typography>
-                      </Stack>
-                    </RouterLink>
-                  </TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>Developer</TableCell>
-                  <TableCell>{row.phone}</TableCell>
-                  <TableCell>
-                    <Button variant="contained" color="error">
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {paginatedEmployees.length > 0 ? (
+              paginatedEmployees.map((row) => {
+                return (
+                  <TableRow hover key={row.id}>
+                    <TableCell>
+                      <RouterLink href="/dashboard/employees/1">
+                        <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
+                          <Avatar src={row.emp_photo} />
+                          <Typography variant="subtitle2">{row.name}</Typography>
+                        </Stack>
+                      </RouterLink>
+                    </TableCell>
+                    <TableCell>{row.email}</TableCell>
+                    <TableCell>{row.position}</TableCell>
+                    <TableCell>{row.phone}</TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Typography textAlign="center">Data not found</Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Box>
       <Divider />
       <TablePagination
         component="div"
-        count={count}
-        onPageChange={noop}
+        count={paginatedEmployees.length}
+        onPageChange={(e, p) => {
+          setPage(p);
+        }}
         onRowsPerPageChange={noop}
         page={page}
         rowsPerPage={rowsPerPage}
@@ -133,4 +94,8 @@ export function EmployeesTable({
       />
     </Card>
   );
+}
+
+function applyPagination(rows: Attendance[], page: number, rowsPerPage: number): Attendance[] {
+  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }

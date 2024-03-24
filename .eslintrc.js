@@ -64,6 +64,12 @@ module.exports = {
     '@typescript-eslint/require-await': 'off', // Server Actions require async flag always
     '@typescript-eslint/prefer-nullish-coalescing': 'off', // personal style
     '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'eslint-comments/require-description': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
     'import/no-default-export': 'off', // Next.js components must be exported as default
     'import/no-extraneous-dependencies': 'off', // conflict with sort-imports plugin
     'import/order': 'off', // using custom sort plugin
@@ -71,7 +77,6 @@ module.exports = {
     'no-redeclare': 'off', // conflict with TypeScript function overloads
     'react/jsx-fragments': 'off', // personal style
     'react/prop-types': 'off', // TypeScript is used for type checking
-
     '@next/next/no-img-element': 'off', // Temporary disabled
   },
 };

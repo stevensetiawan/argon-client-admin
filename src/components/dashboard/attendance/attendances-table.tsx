@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import RouterLink from 'next/link';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getAttendances, selectAttendance } from '@/redux/reducers/attendance';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -16,33 +18,28 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 
+import type { Attendance } from '@/types/attendance';
+
 function noop(): void {
   // do nothing
 }
 
-export interface Attendance {
-  id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
-  createdAt: Date;
-}
+export function AttendancesTable(): React.JSX.Element {
+  const dispatch = useAppDispatch();
+  const attendanceState = useAppSelector(selectAttendance);
+  const [page, setPage] = React.useState(0);
+  const rowsPerPage = 5;
 
-interface AttendancesTableProps {
-  count?: number;
-  page?: number;
-  rows?: Attendance[];
-  rowsPerPage?: number;
-}
+  const paginatedAttendances = applyPagination(attendanceState.attendances ?? [], page, rowsPerPage);
 
-export function AttendancesTable({
-  count = 0,
-  rows = [],
-  page = 0,
-  rowsPerPage = 0,
-}: AttendancesTableProps): React.JSX.Element {
+  React.useEffect(() => {
+    const promise = dispatch(getAttendances());
+
+    return () => {
+      promise.abort();
+    };
+  }, [dispatch]);
+
   return (
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
@@ -57,32 +54,42 @@ export function AttendancesTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
-              return (
-                <TableRow hover key={row.id}>
-                  <TableCell>
-                    <RouterLink href="/dashboard/employees/1">
-                      <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                        <Avatar src={row.avatar} />
-                        <Typography variant="subtitle2">{row.name}</Typography>
-                      </Stack>
-                    </RouterLink>
-                  </TableCell>
-                  <TableCell>Developer</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('hh:mm:ss')}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('hh:mm:ss')}</TableCell>
-                </TableRow>
-              );
-            })}
+            {paginatedAttendances.length > 0 ? (
+              paginatedAttendances.map((row) => {
+                return (
+                  <TableRow hover key={row.id}>
+                    <TableCell>
+                      <RouterLink href="/dashboard/employees/1">
+                        <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
+                          <Avatar src={row.emp_photo} />
+                          <Typography variant="subtitle2">{row.name}</Typography>
+                        </Stack>
+                      </RouterLink>
+                    </TableCell>
+                    <TableCell>{row.position}</TableCell>
+                    <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                    <TableCell>{dayjs(row.time_in).format('hh:mm:ss')}</TableCell>
+                    <TableCell>{dayjs(row.time_out).format('hh:mm:ss')}</TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Typography textAlign="center">Data not found</Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Box>
       <Divider />
       <TablePagination
         component="div"
-        count={count}
-        onPageChange={noop}
+        count={paginatedAttendances.length}
+        onPageChange={(e, p) => {
+          setPage(p);
+        }}
         onRowsPerPageChange={noop}
         page={page}
         rowsPerPage={rowsPerPage}
@@ -90,4 +97,8 @@ export function AttendancesTable({
       />
     </Card>
   );
+}
+
+function applyPagination(rows: Attendance[], page: number, rowsPerPage: number): Attendance[] {
+  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
