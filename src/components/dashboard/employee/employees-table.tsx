@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import RouterLink from 'next/link';
+import { Button } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -14,7 +16,6 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
 
@@ -22,7 +23,7 @@ function noop(): void {
   // do nothing
 }
 
-export interface Attendance {
+export interface Employee {
   id: string;
   avatar: string;
   name: string;
@@ -32,21 +33,21 @@ export interface Attendance {
   createdAt: Date;
 }
 
-interface AttendancesTableProps {
+interface EmployeesTableProps {
   count?: number;
   page?: number;
-  rows?: Attendance[];
+  rows?: Employee[];
   rowsPerPage?: number;
 }
 
-export function AttendancesTable({
+export function EmployeesTable({
   count = 0,
   rows = [],
   page = 0,
   rowsPerPage = 0,
-}: AttendancesTableProps): React.JSX.Element {
+}: EmployeesTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
-    return rows.map((attendance) => attendance.id);
+    return rows.map((employee) => employee.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
@@ -75,9 +76,9 @@ export function AttendancesTable({
               </TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
+              <TableCell>Position</TableCell>
               <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -99,17 +100,21 @@ export function AttendancesTable({
                     />
                   </TableCell>
                   <TableCell>
-                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
-                    </Stack>
+                    <RouterLink href="/dashboard/employees/1">
+                      <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
+                        <Avatar src={row.avatar} />
+                        <Typography variant="subtitle2">{row.name}</Typography>
+                      </Stack>
+                    </RouterLink>
                   </TableCell>
                   <TableCell>{row.email}</TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
+                  <TableCell>Developer</TableCell>
                   <TableCell>{row.phone}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="error">
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               );
             })}

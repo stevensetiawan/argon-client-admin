@@ -1,15 +1,13 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import dayjs from 'dayjs';
 
 import { config } from '@/config';
-import { AttendancesFilters } from '@/components/dashboard/attendances/attendances-filters';
-import { AttendancesTable } from '@/components/dashboard/attendances/attendances-table';
-import type { Attendance } from '@/components/dashboard/attendances/attendances-table';
+import { AttendancesFilters } from '@/components/dashboard/attendance/attendances-filters';
+import { AttendancesTable } from '@/components/dashboard/attendance/attendances-table';
+import type { Attendance } from '@/components/dashboard/attendance/attendances-table';
 
 export const metadata = { title: `Attendances | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -119,11 +117,6 @@ export default function Page(): React.JSX.Element {
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
           <Typography variant="h4">Attendances</Typography>
         </Stack>
-        <div>
-          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
-            Add
-          </Button>
-        </div>
       </Stack>
       <AttendancesFilters />
       <AttendancesTable
