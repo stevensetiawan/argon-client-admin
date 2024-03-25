@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { FetchState } from '@/enums/Fetch';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { createEmployee, selectEmployee } from '@/redux/reducers/employee';
@@ -31,7 +32,6 @@ const schema = zod.object({
   }),
   position: zod.string().min(1, { message: 'Position is required' }),
   password: zod.string().min(1, { message: 'Password is required' }),
-  image: zod.string(),
 });
 
 const defaultValues = {
@@ -40,7 +40,6 @@ const defaultValues = {
   position: '',
   phone: '',
   name: '',
-  image: '',
 } satisfies EmployeeParams;
 
 const positions = [
@@ -50,10 +49,12 @@ const positions = [
 ] as const;
 
 export function EmployeeAddForm(): React.JSX.Element {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const employeeState = useAppSelector(selectEmployee);
   const [image, setImage] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState<boolean>();
+  const [fileImage, setFileImage] = React.useState<File | null>(null);
 
   const {
     control,
@@ -65,16 +66,19 @@ export function EmployeeAddForm(): React.JSX.Element {
   const onSubmit = React.useCallback(
     async (values: EmployeeParams): Promise<void> => {
       try {
-        const promise = await dispatch(createEmployee({ ...values, image: values.image })).unwrap();
+        const promise = await dispatch(createEmployee({ ...values, image: fileImage })).unwrap();
 
         if (promise.code !== 200) {
           setError('root', { type: 'server', message: promise.message });
+          return;
         }
+
+        router.push('/dashboard/employees');
       } catch (error) {
         setError('root', { type: 'server', message: 'Something went wrong' });
       }
     },
-    [dispatch, setError]
+    [dispatch, fileImage, router, setError]
   );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -84,6 +88,7 @@ export function EmployeeAddForm(): React.JSX.Element {
       reader.onloadend = () => {
         const imageDataUrl = reader.result as string;
         setImage(imageDataUrl);
+        setFileImage(file);
       };
       reader.readAsDataURL(file);
     }
@@ -201,20 +206,12 @@ export function EmployeeAddForm(): React.JSX.Element {
                   ) : null}
                   <Button component="label" fullWidth variant="outlined">
                     Upload picture
-                    <Controller
-                      control={control}
-                      name="image"
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="file"
-                          hidden
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleImageChange(e);
-                          }}
-                        />
-                      )}
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        handleImageChange(e);
+                      }}
                     />
                   </Button>
                 </Stack>

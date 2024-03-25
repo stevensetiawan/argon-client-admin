@@ -65,6 +65,19 @@ export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Ele
   const onSubmit = React.useCallback(
     async (values: EmployeeParams): Promise<void> => {
       try {
+        if (values.email === user.email) {
+          values.email = '';
+        }
+        if (values.phone === user.phone) {
+          values.phone = '';
+        }
+        if (values.name === user.name) {
+          values.name = '';
+        }
+        if (values.position === user.position) {
+          values.position = '';
+        }
+
         const promise = await dispatch(updateEmployee({ ...values, image: fileImage, id: user.id })).unwrap();
 
         if (promise.code !== 200) {
@@ -77,7 +90,7 @@ export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Ele
         setError('root', { type: 'server', message: 'Something went wrong' });
       }
     },
-    [dispatch, fileImage, router, setError, user.id]
+    [dispatch, fileImage, router, setError, user.email, user.id, user.name, user.phone, user.position]
   );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
