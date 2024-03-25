@@ -17,5 +17,5 @@ export interface EmployeeParams {
   phone: string;
   position: string;
   password: string;
-  image: string;
+  image?: File | null;
 }

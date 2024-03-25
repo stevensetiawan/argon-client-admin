@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { FetchState } from '@/enums/Fetch';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { selectEmployee, updateEmployee } from '@/redux/reducers/employee';
@@ -31,7 +32,6 @@ const schema = zod.object({
   }),
   position: zod.string().min(1, { message: 'Position is required' }),
   password: zod.string(),
-  image: zod.string(),
 });
 
 const positions = [
@@ -41,17 +41,18 @@ const positions = [
 ] as const;
 
 export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Element {
+  const router = useRouter();
   const defaultValues = {
     email: user.email,
     password: '',
     position: user.position,
     phone: user.phone,
     name: user.name,
-    image: '',
   } satisfies EmployeeParams;
   const dispatch = useAppDispatch();
   const employeeState = useAppSelector(selectEmployee);
   const [image, setImage] = React.useState<string | null>(user.emp_photo !== 'undefined' ? user.emp_photo : null);
+  const [fileImage, setFileImage] = React.useState<File | null>(null);
   const [showPassword, setShowPassword] = React.useState<boolean>();
 
   const {
@@ -64,16 +65,19 @@ export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Ele
   const onSubmit = React.useCallback(
     async (values: EmployeeParams): Promise<void> => {
       try {
-        const promise = await dispatch(updateEmployee({ ...values, image: values.image, id: user.id })).unwrap();
+        const promise = await dispatch(updateEmployee({ ...values, image: fileImage, id: user.id })).unwrap();
 
         if (promise.code !== 200) {
           setError('root', { type: 'server', message: promise.message });
+          return;
         }
+
+        router.push('/dashboard/employees');
       } catch (error) {
         setError('root', { type: 'server', message: 'Something went wrong' });
       }
     },
-    [dispatch, setError, user.id]
+    [dispatch, fileImage, router, setError, user.id]
   );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -83,6 +87,7 @@ export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Ele
       reader.onloadend = () => {
         const imageDataUrl = reader.result as string;
         setImage(imageDataUrl);
+        setFileImage(file);
       };
       reader.readAsDataURL(file);
     }
@@ -200,20 +205,12 @@ export function EmployeeDetailsForm({ user }: { user: Employee }): React.JSX.Ele
                   ) : null}
                   <Button component="label" fullWidth variant="outlined">
                     Upload picture
-                    <Controller
-                      control={control}
-                      name="image"
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="file"
-                          hidden
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleImageChange(e);
-                          }}
-                        />
-                      )}
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        handleImageChange(e);
+                      }}
                     />
                   </Button>
                 </Stack>
