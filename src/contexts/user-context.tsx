@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 
 import type { Employee } from '@/types/employee';
 import { authClient } from '@/lib/auth/client';
@@ -21,7 +21,7 @@ export interface UserProviderProps {
 }
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
-  const router = useRouter();
+  // const router = useRouter();
   const [state, setState] = React.useState<{ user: Employee | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
@@ -31,28 +31,28 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
   const checkSession = React.useCallback(async (): Promise<void> => {
     try {
       const { data, error, exp } = await authClient.getUser();
-
+      console.log(data, 'ini data')
       if (error) {
         logger.error(error);
         setState((prev) => ({ ...prev, user: null, error: 'Something went wrong', isLoading: false }));
         return;
       }
 
-      if (exp) {
-        authClient.tokenExpired(exp, async () => {
-          await authClient.signOut();
-          await checkSession();
+      // if (exp) {
+      //   authClient.tokenExpired(exp, async () => {
+      //     await authClient.signOut();
+      //     await checkSession();
 
-          router.refresh();
-        });
-      }
+      //     router.refresh();
+      //   });
+      // }
 
       setState((prev) => ({ ...prev, user: data ?? null, error: null, isLoading: false }));
     } catch (err) {
       logger.error(err);
       setState((prev) => ({ ...prev, user: null, error: 'Something went wrong', isLoading: false }));
     }
-  }, [router]);
+  }, []);
 
   React.useEffect(() => {
     checkSession().catch((err: unknown) => {

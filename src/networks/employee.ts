@@ -6,7 +6,7 @@ export async function fetchCreateEmployee(
   signal?: AbortSignal
 ) {
   const { data, token } = params;
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api_argon/v1/employee`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL_EMPLOYEE}/api_argon/v1/employee`);
 
   const payload = objectToFormData(data);
 
@@ -29,7 +29,7 @@ export async function fetchUpdateEmployee(
   signal?: AbortSignal
 ) {
   const { data, token } = params;
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api_argon/v1/employee/${data.id}`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL_EMPLOYEE}/api_argon/v1/employee/${data.id}`);
 
   delete data.id;
 
@@ -51,16 +51,13 @@ export async function fetchUpdateEmployee(
 
 export async function fetchDetailEmployee(params: { data: number; token?: string | null }, signal?: AbortSignal) {
   const { data, token } = params;
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api_argon/v1/employee/${data}`);
-
-  const payload = objectToFormData(data);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL_EMPLOYEE}/api_argon/v1/employee/${data}`);
 
   const response = await fetch(`${url}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    body: payload,
     signal,
   });
 
@@ -71,7 +68,7 @@ export async function fetchDetailEmployee(params: { data: number; token?: string
 
 export async function fetchEmployees(params: { token?: string | null }, signal?: AbortSignal) {
   const { token } = params;
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api_argon/v1/employee`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL_EMPLOYEE}/api_argon/v1/employee`);
 
   const response = await fetch(`${url}`, {
     method: 'GET',

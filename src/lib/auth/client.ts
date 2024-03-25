@@ -117,9 +117,9 @@ class AuthClient {
 
     const promise: APIResponse<Employee> = await fetchDetailEmployee({ data: user.id, token });
 
-    if (promise.code !== 200) {
-      return { data: null };
-    }
+    // if (promise.code !== 200) {
+    //  return { data: null };
+    // }
 
     return { data: promise.data, exp };
   }

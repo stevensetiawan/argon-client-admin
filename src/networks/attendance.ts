@@ -1,6 +1,6 @@
 export async function fetchAttendances(params: { token?: string | null }, signal?: AbortSignal) {
   const { token } = params;
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api_argon/v1/attendance`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL_ATTENDANCE}/api_argon/v1/attendance`);
 
   const response = await fetch(`${url}`, {
     method: 'GET',

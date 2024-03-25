@@ -4,6 +4,7 @@ import type { AppState } from '@/redux/store';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import type { SignInParams, SignInResponse } from '@/types/user';
+import type { APIResponse } from '@/types/response';
 
 export interface UserState {
   status: FetchState;
@@ -15,7 +16,7 @@ const initialState: UserState = {
 
 export const signIn = createAsyncThunk('user/sign-in', async (data: SignInParams, { rejectWithValue }) => {
   try {
-    const response: SignInResponse = await fetchSignIn({ data });
+    const response: APIResponse<SignInResponse> = await fetchSignIn({ data });
     return response;
   } catch (error: any) {
     if (!error.response) throw error;
