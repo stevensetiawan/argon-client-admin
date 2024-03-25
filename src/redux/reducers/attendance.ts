@@ -18,7 +18,7 @@ const initialState: AttendanceState = {
 export const getAttendances = createAsyncThunk('attendace/attendances-list', async (_, { rejectWithValue, signal }) => {
   const token = localStorage.getItem('custom-auth-token');
   try {
-    const response: APIResponse<Attendance[]> = await fetchAttendances({ token }, signal);
+    const response: APIResponse<{data: Attendance[]}> = await fetchAttendances({ token }, signal);
     if (response.code !== 200) return rejectWithValue(response);
     return response;
   } catch (error: any) {
@@ -40,7 +40,7 @@ export const AttendanceSlice = createSlice({
       })
       .addCase(getAttendances.fulfilled, (state, action) => {
         state.status = FetchState.IDLE;
-        state.attendances = action.payload.data;
+        state.attendances = action.payload.data.data;
       })
       .addCase(getAttendances.rejected, (state) => {
         state.status = FetchState.FAILED;

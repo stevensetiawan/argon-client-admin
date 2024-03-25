@@ -55,7 +55,7 @@ export const detailEmployee = createAsyncThunk('employee/detail', async (data: n
 export const getEmployees = createAsyncThunk('employee/employees-list', async (_, { rejectWithValue, signal }) => {
   const token = localStorage.getItem('custom-auth-token');
   try {
-    const response: APIResponse<Employee[]> = await fetchEmployees({ token }, signal);
+    const response: APIResponse<{data: Employee[]}> = await fetchEmployees({ token }, signal);
     if (response.code !== 200) return rejectWithValue(response);
     return response;
   } catch (error: any) {
@@ -104,7 +104,7 @@ export const EmployeeSlice = createSlice({
       })
       .addCase(getEmployees.fulfilled, (state, action) => {
         state.status = FetchState.IDLE;
-        state.employees = action.payload.data;
+        state.employees = action.payload.data.data;
       })
       .addCase(getEmployees.rejected, (state) => {
         state.status = FetchState.FAILED;

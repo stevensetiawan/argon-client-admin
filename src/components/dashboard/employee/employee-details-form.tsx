@@ -30,7 +30,7 @@ const schema = zod.object({
     message: 'Invalid phone number format',
   }),
   position: zod.string().min(1, { message: 'Position is required' }),
-  password: zod.string().min(1, { message: 'Password is required' }),
+  password: zod.string(),
   image: zod.string(),
 });
 
