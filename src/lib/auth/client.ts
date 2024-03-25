@@ -84,7 +84,24 @@ class AuthClient {
     return JSON.parse(jsonPayload);
   }
 
-  async getUser(): Promise<{ data?: Employee | null; error?: string }> {
+  tokenExpired = (exp: number, onExpired: VoidFunction) => {
+    // eslint-disable-next-line prefer-const
+    let expiredTimer;
+
+    const currentTime = Date.now();
+
+    // Test token expires after 10s
+    // const timeLeft = currentTime + 3000 - currentTime; // ~3s
+    const timeLeft = exp * 1000 - currentTime;
+
+    clearTimeout(expiredTimer);
+
+    expiredTimer = setTimeout(() => {
+      onExpired();
+    }, timeLeft);
+  };
+
+  async getUser(): Promise<{ data?: Employee | null; error?: string; exp?: number }> {
     // Make API request
 
     // We do not handle the API, so just check if we have a token in localStorage.
@@ -92,7 +109,7 @@ class AuthClient {
     if (!token) {
       return { data: null };
     }
-    const { user } = this.jwtDecode(token);
+    const { user, exp }: { user: Employee; exp: number } = this.jwtDecode(token);
 
     if (!user.id) {
       return { data: null };
@@ -104,7 +121,7 @@ class AuthClient {
       return { data: null };
     }
 
-    return { data: promise.data };
+    return { data: promise.data, exp };
   }
 
   async signOut(): Promise<{ error?: string }> {

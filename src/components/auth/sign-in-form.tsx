@@ -50,10 +50,7 @@ export function SignInForm(): React.JSX.Element {
     async (values: SignInParams): Promise<void> => {
       try {
         const promise = await dispatch(signIn(values)).unwrap();
-        if (promise.code !== 200) {
-          setError('root', { type: 'server', message: promise.message });
-        }
-        localStorage.setItem('custom-auth-token', promise.data.token);
+        localStorage.setItem('custom-auth-token', promise.token);
       } catch (error) {
         setError('root', { type: 'server', message: 'Something went wrong' });
         return;

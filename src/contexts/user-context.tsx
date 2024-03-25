@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 
 import type { Employee } from '@/types/employee';
 import { authClient } from '@/lib/auth/client';
@@ -20,6 +21,7 @@ export interface UserProviderProps {
 }
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
+  const router = useRouter();
   const [state, setState] = React.useState<{ user: Employee | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
@@ -28,7 +30,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
 
   const checkSession = React.useCallback(async (): Promise<void> => {
     try {
-      const { data, error } = await authClient.getUser();
+      const { data, error, exp } = await authClient.getUser();
 
       if (error) {
         logger.error(error);
@@ -36,12 +38,21 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
         return;
       }
 
+      if (exp) {
+        authClient.tokenExpired(exp, async () => {
+          await authClient.signOut();
+          await checkSession();
+
+          router.refresh();
+        });
+      }
+
       setState((prev) => ({ ...prev, user: data ?? null, error: null, isLoading: false }));
     } catch (err) {
       logger.error(err);
       setState((prev) => ({ ...prev, user: null, error: 'Something went wrong', isLoading: false }));
     }
-  }, []);
+  }, [router]);
 
   React.useEffect(() => {
     checkSession().catch((err: unknown) => {

@@ -19,6 +19,7 @@ export function MainNav(): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
 
   const userPopover = usePopover<HTMLDivElement>();
+  const notificationPopover = usePopover<HTMLButtonElement>();
 
   return (
     <React.Fragment>
@@ -50,7 +51,7 @@ export function MainNav(): React.JSX.Element {
           <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
             <Tooltip title="Notifications">
               <Badge badgeContent={4} color="success" variant="dot">
-                <IconButton>
+                <IconButton onClick={notificationPopover.handleOpen} ref={notificationPopover.anchorRef}>
                   <BellIcon />
                 </IconButton>
               </Badge>
@@ -65,6 +66,11 @@ export function MainNav(): React.JSX.Element {
         </Stack>
       </Box>
       <UserPopover anchorEl={userPopover.anchorRef.current} onClose={userPopover.handleClose} open={userPopover.open} />
+      <UserPopover
+        anchorEl={notificationPopover.anchorRef.current}
+        onClose={notificationPopover.handleClose}
+        open={notificationPopover.open}
+      />
       <MobileNav
         onClose={() => {
           setOpenNav(false);
